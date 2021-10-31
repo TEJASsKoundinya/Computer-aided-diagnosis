@@ -1,0 +1,205 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Analizaa</title>
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">  
+    <style>
+        .img-preview {
+    width: 256px;
+    height: 256px;
+    position: relative;
+    border: 5px solid #dac9c9;
+    box-shadow: 0px 2px 4px 0px rgba(252, 252, 252, 0.1);
+    margin-top: 1em;
+    margin-bottom: 1em;    
+    border-radius: 25px;
+}
+
+.img-preview>div {
+    width: 100%;
+    height: 100%;
+    background-size: 256px 256px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 25px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.upload-label{
+    display: inline-block;
+    padding: 12px 30px;
+    background: #ca4e4e;
+    color: rgb(248, 245, 245);
+    font-size: 1em;
+    transition: all .4s;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+.upload-label:hover{
+    background: #f4f4f5;
+    color: #000000;
+}
+
+.loader {
+    border: 8px solid #fafafa; 
+    border-top: 8px solid #f30000;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    
+    
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.hood{
+    background-color: #913e29d0;
+    border-radius: 10px;
+    border-style: dotted;
+    border-spacing: 15px;
+    border-color: rgb(46, 46, 46);
+    padding: 50px;
+    border-width: 15px;
+    border-bottom-style: ridge;
+    
+    
+
+}
+
+.btn-primary btn-lg{
+    display: inline-block;
+    padding: 12px 30px;
+    background: #34c447;
+    color: rgb(8, 8, 8);
+    font-size: 1em;
+    transition: all .4s;
+    cursor: pointer;
+    border-radius: 20px;
+
+}
+
+.ana button{
+    background-color:rgb(83, 133, 8) ;
+    border-radius: 10px;
+    border-style: none;
+    color: black;
+}
+
+
+    </style>    
+</head>
+
+<body>
+    <div class="hood">
+<center>
+    <div class="container">
+       
+        <div id="content" style="margin-top:2em"><h2>Scanner</h2>
+
+            <div>
+                <form id="upload-file" method="post" enctype="multipart/form-data">
+                    <label for="imageUpload" class="upload-label">
+                        ..Select img..
+                    </label>
+                    <input type="file" name="file" id="imageUpload" accept=".png, .jpg, .jpeg">
+                </form>
+            
+                <div class="image-section" style="display:none;">
+                    <div class="img-preview">
+                        <div id="imagePreview">
+                        </div>
+                    </div>
+                    <div class="ana" >
+                        <button type="button" class="btn-primary btn-lg " id="btn-predict"
+                            onclick="exec('python app.py');">Analise</button>
+                    </div>
+                </div>
+            
+                <div class="loader" style="display:none;"></div>
+            
+                <h3 id="result">
+                    <span> </span>
+                </h3>
+            
+            </div></div>
+    </div>
+</center>
+</div>
+</body>
+
+<footer>
+    <script> 
+            
+    $(document).ready(function () {
+    // Init
+    $('.image-section').hide();
+    $('.loader').hide();
+    $('#result').hide();
+
+    // Upload Preview
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#imagePreview').css('background-image', 'url(' + e.target.result + ')');
+                $('#imagePreview').hide();
+                $('#imagePreview').fadeIn(650);
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    $("#imageUpload").change(function () {
+        $('.image-section').show();
+        $('#btn-predict').show();
+        $('#result').text('');
+        $('#result').hide();
+        readURL(this);
+    });
+
+    // Predict
+    $('#btn-predict').click(function () {
+        var form_data = new FormData($('#upload-file')[0]);
+
+        // call loder
+        $(this).hide();
+        $('.loader').show();
+
+        //analize by calling api 
+        $.ajax({
+            type: 'POST',
+            url: '/predict',
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            async: true,
+            success: function (data) {
+                // Get and display the result
+                $('.loader').hide();
+                $('#result').fadeIn(600);
+                $('#result').text(' Result:  ' + data);
+                console.log('Success!');
+            },
+        });
+    });
+
+});
+
+</script>    
+</footer>
+
+</html>
